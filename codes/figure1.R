@@ -42,10 +42,10 @@ X <- data.frame(X1=c(rnorm(n/2, mean = 0, sd = sd1),
 cl_X <- km_fun(X, K=3)
 plt1 <- ggplot(X) + 
   aes(x=X1, y=X2) + 
-  geom_density_2d(aes(colour="Original data"), size = 1, alpha = .5) +
+  geom_density_2d(aes(colour="Original data"), size = 1.2, alpha = .5) +
   scale_colour_manual(name = "", values = "black") +
   ggnewscale::new_scale_colour() +
-  geom_point(aes(colour = cl_X), size = 3) +
+  geom_point(aes(colour = cl_X), size = 4) +
   scale_colour_manual(name = "Clusters", 
                       values = cluster_col,
                       labels = c(TeX(r'($C_1$)'),
@@ -53,8 +53,9 @@ plt1 <- ggplot(X) +
                                  TeX(r'($C_3)'))) +
   xlab(TeX(r'($X_1$)')) +
   ylab(TeX(r'($X_2$)')) +
-  theme_classic(base_size=15) + 
-  theme(legend.position = "bottom")
+  theme_classic() +
+  # theme(legend.position = "bottom") +
+  NULL
 
 plt1
 
@@ -114,24 +115,27 @@ plt2 <- do.call(rbind.data.frame, res) %>%
   geom_abline(slope=1, intercept=0, col="red", size = 1.2, alpha = .7) + xlab("Theoretical Quantiles") + 
   stat_qq(aes(sample = Pvalues, colour = factor(Method, levels = c("True Intra Cluster Variance",
                                                                    "Estimated intra-cluster variance",
-                                                                   "Global Variance"))), distribution = qunif) +
-  scale_colour_manual(name = "Variance estimation", 
+                                                                   "Global Variance"))), distribution = qunif, size = 3) +
+  scale_colour_manual(name = "Variance", 
                       values = results_col,
-                      labels = c("True intra-cluster variance",
-                                 "Estimated intra-cluster variance",
-                                 "Global variance")) +
+                      labels = c(TeX(r'($\sigma^2_k$)'),
+                                 TeX(r'($\hat{\sigma}^2_{\hat{k}}$)'),
+                                 TeX(r'($\hat{\sigma}^2$)'))) +
   ylab("Empirical Quantiles") + 
-  xlim(c(0, 1)) + ylim(c(0, 1)) + theme_classic(base_size=15) 
+  xlim(c(0, 1)) + ylim(c(0, 1)) + theme_classic() 
 plt2
 
 plt_final <- plt1 + plt2 +
-  plot_layout(widths = c(3,2)) + 
+  plot_layout(widths = c(10, 12)) + 
   plot_annotation(tag_levels = "A") &
-  theme(text = element_text(size = 14), 
+  theme(axis.title = element_text(size = 24), 
+        axis.text = element_text(size = 18),
+        legend.text = element_text(size = 20),
+        legend.title = element_text(size = 24),
         plot.tag = element_text(face = "bold"))
 plt_final
 ggsave(plt_final, filename = "figures/figure1.pdf",
-       width = 300, 
-       height = 100, 
+       width = 350, 
+       height = 120, 
        units = "mm",
        dpi = 600)
