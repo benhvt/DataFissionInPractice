@@ -22,6 +22,8 @@ cov_mat_null <- list(cbind(c(sd2^2, 0), c(0, sd1^2)))
 delta <- 10
 tau <- 0.4
 true_classes <- as.factor(rep(1:2, each = n/2))
+true_classes_null <- as.factor(rep(1,n))
+
 alpha <- .05
 
 nsimu <- 1000
@@ -41,8 +43,8 @@ X_null <- data.frame(X1=c(rnorm(n, sd = sd2)),
 cl_X_null <- km_fun(X_null, K=2)
 plt1_null <- ggplot(X_null) + 
   aes(x=X1, y=X2) + 
-  geom_density_2d(aes(colour="Original data"), size = 1.2, alpha = .5) +
-  scale_colour_manual(name = "", values = "black") +
+  geom_density_2d(aes(colour=true_classes_null), size = 1.2, alpha = .5) +
+  scale_colour_manual(name = "True class", values = c("#E70E02")) +
   ggnewscale::new_scale_colour() +
   geom_point(aes(colour = cl_X_null), size = 4) +
   scale_colour_manual(name = "Clusters", 
@@ -138,8 +140,8 @@ X <- data.frame(X1=c(rnorm(n/2, mean = 0, sd = sd1),
 cl_X <- km_fun(X, K=3)
 plt1 <- ggplot(X) + 
   aes(x=X1, y=X2) + 
-  geom_density_2d(aes(colour="Original data"), size = 1.2, alpha = .5) +
-  scale_colour_manual(name = "", values = "black") +
+  geom_density_2d(aes(colour=true_classes), size = 1.2, alpha = .5) +
+  scale_colour_manual(name = "True classes", values = c("#274060", "#E70E02")) +
   ggnewscale::new_scale_colour() +
   geom_point(aes(colour = cl_X), size = 4) +
   scale_colour_manual(name = "Clusters", 
@@ -154,8 +156,6 @@ plt1 <- ggplot(X) +
   NULL
 
 plt1
-
-
 
 #Simulations 
 
