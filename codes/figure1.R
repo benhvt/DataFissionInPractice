@@ -118,9 +118,9 @@ plt2 <- do.call(rbind.data.frame, res) %>%
                                                                    "Global Variance"))), distribution = qunif, size = 3) +
   scale_colour_manual(name = "Variance", 
                       values = results_col,
-                      labels = c(TeX(r'($\sigma^2_k$)'),
-                                 TeX(r'($\hat{\sigma}^2_{\hat{k}}$)'),
-                                 TeX(r'($\hat{\sigma}^2$)'))) +
+                      labels = c(TeX(r'($\Sigma_g$)'),
+                                 TeX(r'($\hat{\Sigma}_{\hat{g}}$)'),
+                                 TeX(r'($\hat{\Sigma}$)'))) +
   ylab("Empirical Quantiles") + 
   xlim(c(0, 1)) + ylim(c(0, 1)) + theme_classic() 
 plt2
