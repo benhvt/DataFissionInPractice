@@ -58,3 +58,12 @@ order_cluster <- function(x, cl){
   }
   return(c(cl1, cl2))
 }
+
+compute_typeI <- function(n, tau, sigma, sigma_hat, alpha){
+  qu_t <- qt(alpha/2, df = n-2, lower.tail = FALSE)
+  qu_n <- qnorm(alpha/2, lower.tail = F)
+  cor_fg <- (sigma^2-sigma_hat^2)/sqrt((sigma^2 + (tau^2)*sigma_hat^2)*(sigma^2 + (1/tau^2)*sigma_hat^2))  
+  mean_t <- sqrt(n)*sqrt((2/pi)*cor_fg^2)/sqrt(1-(2/pi)*cor_fg^2)
+  
+  return(pnorm(qu_n, mean = mean_t, sd= 1, lower.tail = FALSE) + pnorm(-qu_n, mean = mean_t, sd= 1, lower.tail = TRUE))
+}
