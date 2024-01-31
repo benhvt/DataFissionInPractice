@@ -37,7 +37,7 @@ sim_fun_sigma <- function(n,sigma, sigma_hat, tau, nsim){
 
 #-- Simulations 
 n <- 100
-sigma <- c(0.1, 1, 2)
+sigma <- c(0.1, 0.5, 1, 2)
 sigma_grid <- sort(c(seq(0, 4, length.out = 50), 2, 0.1))
 nsimu <- 1000
 tau <- .4
@@ -50,12 +50,13 @@ data.frame(EmpTypeI = unlist(sim_res),
            sigma_hat = rep(sigma_grid, length(sigma))) %>%
   mutate(TheTypeI = compute_typeI(n = n, tau = tau, sigma = sigma, sigma_hat = sigma_hat, alpha = .05)) %>%
   mutate(sigma_name = paste0("sigma^2==", sigma^2)) %>%
-  ggplot() + aes(x=sigma^2-sigma_hat^2, y = EmpTypeI) +
+  mutate(Ratio = (sigma^2-sigma_hat^2)/sigma^2) %>%
+  ggplot() + aes(x=Ratio, y = EmpTypeI) +
   geom_point(shape = 2, size = 3) +  
-  geom_line(aes(x=sigma^2-sigma_hat^2, y = TheTypeI, colour = "Theoritical Type I error rate"), linewidth = 1.5) +
-  scale_colour_manual(name = " ", 
+  geom_line(aes(x=Ratio, y = TheTypeI, colour = "Theoritical Type I error rate"), linewidth = 1.5) +
+  scale_colour_manual(name = " ",
                       values ="#5C7AFF") +
-  xlab(TeX(r'($\sigma^2 - \hat{\sigma}^2$)')) +
+  xlab(TeX(r'($(\sigma^2 - \hat{\sigma^2})/\sigma^2$)')) +
   ylab("Type I error rate") +
   ggnewscale::new_scale_colour() +
   geom_hline(aes(yintercept = 0.05, 
@@ -78,7 +79,8 @@ data.frame(EmpTypeI = unlist(sim_res),
   NULL
 
 ggsave(filename = "figures/figure2.pdf",
-       width = 300, 
-       height = 120, 
+       width = 220, 
+       height = 150, 
        units = "mm",
        dpi = 600)
+ 

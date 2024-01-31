@@ -78,7 +78,7 @@ apply_sim_delta_sigma <- function(seed, delta_grid, n=100, sd_grid, tau = 0.4){
 n <- 100
 delta_grid <- c(seq(0, 3, length.out = 25), seq(3.5, 100, length.out = 25))
 tau <- .4
-sigma <- c(0.1, 1, 2) 
+sigma <- c(0.1, 0.5, 1, 2) 
 nsimu <- 1000
 
 res_sim <- pblapply(1:nsimu, function(ns){
@@ -100,8 +100,8 @@ plot_typeI <- df %>%
   # geom_point(size = 3) +
   geom_line(size = 1.4) +
   scale_colour_manual(name = TeX(r'($\sigma^2$)'),
-                      values = c("#93B5C6", "#998bc0", "#BD4F6C"),
-                      labels = c(0.01, 1, 4)) +
+                      values = c("#93B5C6", "#DBC2CF","#998bc0", "#BD4F6C"),
+                      labels = c(0.01, 0.5, 1, 4)) +
   ggnewscale::new_scale_colour() +
   geom_hline(aes(yintercept = 0.05, 
                  colour = "5% nominal levels"),
@@ -128,8 +128,8 @@ plot_est <- df %>% mutate(Upper = sigma^2 + (Variance + sdVariance_hat),
   aes(x=Ratio, y = (Variance - sigma^2)/sigma^2, colour = sigma_lab) +
   geom_line(size = 1.4) +
   scale_colour_manual(name = TeX(r'($\sigma^2$)'),
-                     values = c("#93B5C6", "#998bc0", "#BD4F6C"),
-                     labels = c(0.01, 1, 4)) +
+                     values = c("#93B5C6", "#DBC2CF", "#998bc0", "#BD4F6C"),
+                     labels = c(0.01, 0.5, 1, 4)) +
   geom_hline(aes(yintercept = 0), colour = "#6C0E23", size = 1.4) + 
   scale_x_log10() +
   annotation_logticks(sides = "b") +
