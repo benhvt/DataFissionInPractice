@@ -91,11 +91,12 @@ df <- do.call(rbind.data.frame,res_sim) %>%
   summarise(TypeI = mean(pval < 0.05), 
             Variance= mean(Variance_hat),
             sdVariance_hat = sd(Variance_hat)) %>%
-  mutate(sigma_lab = paste0("sigma^2==", sigma^2))
+  mutate(sigma_lab = paste0("sigma^2==", sigma^2)) %>%
+  mutate(Ratio = delta/(sigma^2))
 
 plot_typeI <- df %>% 
   ggplot() + 
-  aes(x=delta, y = TypeI, colour = sigma_lab) +
+  aes(x=Ratio, y = TypeI, colour = sigma_lab) +
   # geom_point(size = 3) +
   geom_line(size = 1.4) +
   scale_colour_manual(name = TeX(r'($\sigma^2$)'),
@@ -109,7 +110,7 @@ plot_typeI <- df %>%
   scale_colour_manual(name = "",
                       values = "#6C0E23") +
   scale_x_log10() +
-  xlab(TeX(r'(Mean difference $\delta$)')) +
+  xlab(TeX(r'(Ratio $\delta/\sigma^2$)')) +
   annotation_logticks(sides = "b") +
   ylab("Empirical Type I error rate") +
   theme_classic() +
@@ -121,27 +122,19 @@ plot_typeI <- df %>%
         plot.tag = element_text(face = "bold", size = 24)) +
   NULL
 
-plot_est <- df %>% mutate(Upper = Variance + sdVariance_hat, 
-                          Lower = Variance - sdVariance_hat) %>%
+plot_est <- df %>% mutate(Upper = sigma^2 + (Variance + sdVariance_hat), 
+                          Lower = sigma^2 - (Variance - sdVariance_hat)) %>%
   ggplot() +
-  aes(x=delta, y = Variance, colour = sigma_lab) +
-  geom_point(size = 3) +
-  geom_errorbar(aes(x = delta, ymin =Lower, ymax = Upper), width = 0.3, alpha = .5) +
-  facet_wrap(~sigma_lab, scales = "free_y", labeller = label_parsed) +
+  aes(x=Ratio, y = (Variance - sigma^2)/sigma^2, colour = sigma_lab) +
+  geom_line(size = 1.4) +
   scale_colour_manual(name = TeX(r'($\sigma^2$)'),
                      values = c("#93B5C6", "#998bc0", "#BD4F6C"),
                      labels = c(0.01, 1, 4)) +
-  ggnewscale::new_scale_colour() +
-  geom_hline(aes(yintercept = sigma^2, colour = sigma_lab), size = 1.4) + 
-  scale_colour_manual(name = TeX(r'(True value of $\sigma^2$)'),
-                      values = c("#677f8b",
-                                 "#5c5373",
-                                 "#712f41"),
-                      labels = c(0.01, 1, 4)) +
+  geom_hline(aes(yintercept = 0), colour = "#6C0E23", size = 1.4) + 
   scale_x_log10() +
   annotation_logticks(sides = "b") +
-  xlab(TeX(r'(Mean difference $\delta$)')) +
-  ylab(TeX(r'($\sigma^2$ estimation)')) +
+  xlab(TeX(r'(Ratio $\delta/\sigma^2$)')) +
+  ylab(TeX(r'(${(\sigma^2 - \hat{\sigma^2})}/{sigma^2}$)')) +
   theme_classic() +
   theme(axis.title = element_text(size = 24), 
         axis.text = element_text(size = 18),
@@ -151,10 +144,12 @@ plot_est <- df %>% mutate(Upper = Variance + sdVariance_hat,
         plot.tag = element_text(face = "bold", size = 24)) +
   NULL
 
-plot_est/plot_typeI + plot_annotation(tag_levels = "A") & 
+plot_est/plot_typeI + 
+  plot_annotation(tag_levels = "A") & 
   theme(plot.tag = element_text(face = "bold", size = 24))
 ggsave(filename = "figures/figure3.pdf", 
-       width = 300,
-       height = 200, 
+       width = 220,
+       height = 175, 
        units = "mm",
        dpi = 600)
+ 
