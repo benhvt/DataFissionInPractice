@@ -79,8 +79,49 @@ data.frame(EmpTypeI = unlist(sim_res),
   NULL
 
 ggsave(filename = "figures/figure2.pdf",
-       width = 220, 
-       height = 150, 
+       width = 200, 
+       height = 160, 
+       units = "mm",
+       dpi = 600)
+
+##- Second prorposition 
+data.frame(EmpTypeI = unlist(sim_res),
+           sigma = rep(sigma, each = length(sigma_grid)),
+           sigma_hat = rep(sigma_grid, length(sigma))) %>%
+  mutate(TheTypeI = compute_typeI(n = n, tau = tau, sigma = sigma, sigma_hat = sigma_hat, alpha = .05)) %>%
+  mutate(sigma_name = paste0("sigma^2==", sigma^2)) %>%
+  mutate(Ratio = (sigma^2-sigma_hat^2)/sigma^2) %>%
+  ggplot() + aes(x=Ratio, y = EmpTypeI, colour = sigma_name) +
+  geom_point(shape = 2, size = 4) +  
+  scale_colour_manual(name = 'Empirical Type I error rate',
+                      values = c("#93B5C6", "#DBC2CF", "#998bc0", "#BD4F6C"),
+                      labels = c(TeX(r'($\sigma^2 = 0.01$)'),
+                                          TeX(r'($\sigma^2 = 0.25$)'),
+                                          TeX(r'($\sigma^2 = 1$)'),
+                                          TeX(r'($\sigma^2 = 4$)'))) +
+  ggnewscale::new_scale_colour() +
+  geom_line(aes(x=Ratio, y = TheTypeI, colour = sigma_name), linewidth = 1.5, alpha = .8) +
+  scale_colour_manual(name = "Theoritical Type I error rate",
+                      values = c("#677f8b", "#998891", "#6b6186", "#84374c"),
+                      labels = c(TeX(r'($\sigma^2 = 0.01$)'),
+                                 TeX(r'($\sigma^2 = 0.25$)'),
+                                 TeX(r'($\sigma^2 = 1$)'),
+                                 TeX(r'($\sigma^2 = 4$)'))) +
+  xlab(TeX(r'($(\sigma^2 - \hat{\sigma^2})/\sigma^2$)')) +
+  xlim(c(-5,2)) +
+  ylab("Type I error rate") +
+  ggnewscale::new_scale_colour() +
+  geom_hline(aes(yintercept = 0.05, 
+                 colour = "5% nominal levels"),
+             linetype = 2,
+             size = 1.2) +
+  scale_colour_manual(name = "",
+                      values = "#6C0E23") +
+  NULL
+
+ggsave(filename = "figures/figure2Option2.pdf",
+       width = 180, 
+       height = 100, 
        units = "mm",
        dpi = 600)
  
