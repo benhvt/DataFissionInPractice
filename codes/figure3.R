@@ -12,9 +12,14 @@ theme_set(theme_bw())
 #-- Functions 
 source("utils.R")
 
+# kernel <- function(u, h) {
+#   a <- h *sqrt(3)
+#   return(ifelse(abs(u) < a, 0.5/a, 0))
+# }
+
+#Gaussian
 kernel <- function(u, h) {
-  a <- h *sqrt(3)
-  return(ifelse(abs(u) < a, 0.5/a, 0))
+  return(dnorm(u, sd=h))
 }
 
 weightvar <- function(x,obs, h = NULL){
@@ -25,13 +30,26 @@ weightvar <- function(x,obs, h = NULL){
   return(modi::weighted.var(obs, weigth))
 }
 
+compute_hi <- function(x, obs){
+  e2 <- (x-obs)^2
+  spread_knns <- (cumsum(sort(e2))/(1:length(e2)-1))[-length(e2)][-1]
+  y <- spread_knns
+  n <- 1:length(spread_knns)
+  bkp_ind <- floor(segmented::segmented(lm(y~n))$psi[,"Est."])
+  spread_sqrt <- sqrt(spread_knns[bkp_ind])
+  
+  hi <- abs(x-obs[order(e2)[bkp_ind+1]])
+  return(hi)
+  }
 local_var <- function(x){
   n <- length(x)
   h0 <- ks::hpi(x, deriv.order = 1)
   pilot <- ks::kde(x, h = h0, eval.points=x)$estimate
   lambda <- exp(mean(log(pilot)))
-  hi <- h0*sqrt(lambda/pilot)
-  variance_wk <- sapply(1:n, FUN = function(i){weightvar(x[i], obs = x, h = hi[i])})
+
+  variance_wk <- sapply(1:n, FUN = function(i){
+    hi <- compute_hi(x[i], obs = x)
+    weightvar(x[i], obs = x, h = hi)})
   return(variance_wk)
 }
 
@@ -79,7 +97,7 @@ n <- 100
 delta_grid <- c(seq(0, 3, length.out = 25), seq(3.5, 100, length.out = 25))
 tau <- .4
 sigma <- c(0.1, 0.5, 1, 2) 
-nsimu <- 1000
+nsimu <- 10
 
 res_sim <- pblapply(1:nsimu, function(ns){
   res <- apply_sim_delta_sigma(seed = ns, delta_grid = delta_grid, n = n, sd_grid = sigma, tau = tau)
@@ -92,7 +110,7 @@ df <- do.call(rbind.data.frame,res_sim) %>%
             Variance= mean(Variance_hat),
             sdVariance_hat = sd(Variance_hat)) %>%
   mutate(sigma_lab = paste0("sigma^2==", sigma^2)) %>%
-  mutate(Ratio = delta/(sigma^2))
+  mutate(Ratio = delta/(sigma))
 
 plot_typeI <- df %>% 
   ggplot() + 
@@ -110,9 +128,9 @@ plot_typeI <- df %>%
   scale_colour_manual(name = "",
                       values = "#6C0E23") +
   scale_x_log10() +
-  xlab(TeX(r'(Ratio $\delta/\sigma^2$)')) +
+  xlab(TeX(r'(Ratio $\delta/\sigma$)')) +
   annotation_logticks(sides = "b") +
-  ylab("Empirical Type I error rate") +
+  ylab("Empirical \n Type I error rate") +
   theme_classic() +
   theme(axis.title = element_text(size = 24), 
         axis.text = element_text(size = 18),
@@ -133,8 +151,8 @@ plot_est <- df %>% mutate(Upper = sigma^2 + (Variance + sdVariance_hat),
   geom_hline(aes(yintercept = 0), colour = "#6C0E23", size = 1.4) + 
   scale_x_log10() +
   annotation_logticks(sides = "b") +
-  xlab(TeX(r'(Ratio $\delta/\sigma^2$)')) +
-  ylab(TeX(r'(${(\sigma^2 - \hat{\sigma^2})}/{sigma^2}$)')) +
+  xlab(TeX(r'(Ratio $\delta/\sigma$)')) +
+  ylab("Relative bias") +
   theme_classic() +
   theme(axis.title = element_text(size = 24), 
         axis.text = element_text(size = 18),
