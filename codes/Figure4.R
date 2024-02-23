@@ -124,7 +124,7 @@ plt1 <- ggplot(X) + aes(x=X1, y=X2) +
   xlab(TeX(r'($X_1$)')) +
   ylab(TeX(r'($X_2$)')) +
   theme_classic() +
-  theme(legend.position = "bottom") +
+  # theme(legend.position = "bottom") +
   NULL
 
 
@@ -136,7 +136,7 @@ plt2 <- do.call(rbind.data.frame, sim_res_wrong) %>%
               distribution = qunif, size = 3) +
   scale_colour_manual(name = "Overdispersion", 
                       values = results_col,
-                      labels=c(TeX(r'($\theta_{g}$)'),
+                      labels=c(TeX(r'($\hat{\theta}_{g}$)'),
                                TeX(r'($\hat{\theta}_{\hat{g}}$)'),
                                TeX(r'($\hat{\theta}$)'))) +
   ylab("Empirical Quantiles") + 
@@ -144,22 +144,22 @@ plt2 <- do.call(rbind.data.frame, sim_res_wrong) %>%
 plt2
 
 plt_final <- plt1 + plt2 +
-  plot_layout(widths = c(12, 10)) + 
+  plot_layout(widths = c(10, 8)) +
   plot_annotation(tag_levels = "A") &
   theme(axis.title = element_text(size = 24), 
         axis.text = element_text(size = 18),
-        legend.position = "bottom",
+        # legend.position = "bottom",
         legend.text = element_text(size = 20),
         legend.title = element_text(size = 24),
         plot.tag = element_text(face = "bold"))
 plt_final
 
 ggsave(plt_final, filename = "figures/figure4.pdf",
-       width = 400, 
-       height = 150, 
+       width = 350, 
+       height = 100, 
        units = "mm",
-       dpi = 600)
- 
+        dpi = 600)
+       
 
 
 
