@@ -9,6 +9,8 @@ library(latex2exp)
 library(patchwork)
 theme_set(theme_bw())
 
+# ------------------------------ Simulations study --------------------------- #
+
 #-- Functions 
 source("utils.R")
 
@@ -143,23 +145,46 @@ plt2 <- do.call(rbind.data.frame, sim_res_wrong) %>%
   xlim(c(0, 1)) + ylim(c(0, 1)) + theme_classic() 
 plt2
 
-plt_final <- plt1 + plt2 +
-  plot_layout(widths = c(10, 8)) +
+
+# ------------------------------ Applications --------------------------- #
+
+overdispersion_estimate <- read.csv(file ="results/overdispersion_estimate.csv")
+R2 <- overdispersion_estimate %>% filter(Global < 4 & Intra < 4) %>%
+  group_by(CellType) %>%
+  summarise(R2 = cor(Intra, Global))
+
+plt_application <- ggplot(overdispersion_estimate) + 
+  aes(x=Global, y = Intra, colour = CellType) +
+  geom_point(size = 4, alpha = .5) + 
+  xlim(c(0, 4)) +
+  ylim(c(0, 4)) +
+  xlab(TeX(r'(Intra-cell population overdispersion $\hat{\theta}_g$)')) +
+  ylab(TeX(r'(Global overdispersion $\hat{\theta}$)')) +
+  scale_colour_manual(name = "Cell type", 
+                      values = c('#5C0029', 
+                                 "#E63946",
+                                 "#A8DADC",
+                                 "#457B9D")) +
+  facet_grid(~CellType) +
+  geom_text(data = R2, aes(x=1.5, y = 3.5, label = paste0("R2=", round(R2,3))), colour = "black", size = 8) +
+  geom_abline(slope = 1, intercept = 0, colour = "darkred", size = 1.2, linetype = "dashed") +
+  theme_classic() +
+  theme(legend.position = "bottom") +
+  NULL  
+
+plt_final <- (plt1 + plt2) / plt_application +
   plot_annotation(tag_levels = "A") &
-  theme(axis.title = element_text(size = 24), 
-        axis.text = element_text(size = 18),
+  theme(axis.title = element_text(size = 20), 
+        axis.text = element_text(size = 14),
         # legend.position = "bottom",
-        legend.text = element_text(size = 20),
-        legend.title = element_text(size = 24),
-        plot.tag = element_text(face = "bold"))
+        legend.text = element_text(size = 16),
+        legend.title = element_text(size = 18),
+        strip.text = element_text(size = 16),
+        plot.tag = element_text(face = "bold", size = 20))
 plt_final
 
 ggsave(plt_final, filename = "figures/figure4.pdf",
-       width = 350, 
-       height = 100, 
+       width = 300, 
+       height = 200, 
        units = "mm",
         dpi = 600)
-       
-
-
-
