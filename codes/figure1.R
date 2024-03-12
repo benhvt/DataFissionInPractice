@@ -43,7 +43,7 @@ X_null <- data.frame(X1=c(rnorm(n, sd = sd2)),
 cl_X_null <- km_fun(X_null, K=2)
 plt1_null <- ggplot(X_null) + 
   aes(x=X1, y=X2) + 
-  geom_point(aes(colour = cl_X_null, shape = true_classes_null), size = 4) +
+  geom_point(aes(colour = cl_X_null, shape = true_classes_null), size = 3) +
   scale_colour_manual(name = "Clusters", 
                       values = cluster_col,
                       labels = c(TeX(r'($C_1$)'),
@@ -112,8 +112,8 @@ plt2_null <- do.call(rbind.data.frame, res_null) %>%
                                                                    "Global Variance"))), distribution = qunif, size = 1.5) +
   scale_colour_manual(name = "Variance", 
                       values = results_col,
-                      labels = c(TeX(r'($\Sigma_g$)'),
-                                 TeX(r'($\hat{\Sigma}_{\hat{g}}$)'),
+                      labels = c(TeX(r'($\Sigma_k$)'),
+                                 TeX(r'($\hat{\Sigma}_{\hat{k}}$)'),
                                  TeX(r'($\hat{\Sigma}$)'))) +
   ylab("Empirical Quantiles") + 
   xlim(c(0, 1)) + ylim(c(0, 1)) + theme_classic() 
@@ -139,7 +139,7 @@ X <- data.frame(X1=c(rnorm(n/2, mean = 0, sd = sd1),
 cl_X <- km_fun(X, K=3)
 plt1 <- ggplot(X) + 
   aes(x=X1, y=X2) + 
-  geom_point(aes(colour = cl_X, shape = true_classes), size = 4) +
+  geom_point(aes(colour = cl_X, shape = true_classes), size = 3) +
   scale_colour_manual(name = "Clusters", 
                       values = cluster_col,
                       labels = c(TeX(r'($C_1$)'),
@@ -211,8 +211,8 @@ plt2 <- do.call(rbind.data.frame, res) %>%
                                                                    "Global Variance"))), distribution = qunif, size = 1.5) +
   scale_colour_manual(name = "Variance", 
                       values = results_col,
-                      labels = c(TeX(r'($\Sigma_g$)'),
-                                 TeX(r'($\hat{\Sigma}_{\hat{g}}$)'),
+                      labels = c(TeX(r'($\Sigma_k$)'),
+                                 TeX(r'($\hat{\Sigma}_{\hat{k}}$)'),
                                  TeX(r'($\hat{\Sigma}$)'))) +
   ylab("Empirical Quantiles") + 
   xlim(c(0, 1)) + ylim(c(0, 1)) + theme_classic() 
