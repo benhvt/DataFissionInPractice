@@ -43,15 +43,14 @@ X_null <- data.frame(X1=c(rnorm(n, sd = sd2)),
 cl_X_null <- km_fun(X_null, K=2)
 plt1_null <- ggplot(X_null) + 
   aes(x=X1, y=X2) + 
-  geom_density_2d(aes(colour=true_classes_null), size = 1.2, alpha = .5) +
-  scale_colour_manual(name = "True class", values = c("#E70E02")) +
-  ggnewscale::new_scale_colour() +
-  geom_point(aes(colour = cl_X_null), size = 4) +
+  geom_point(aes(colour = cl_X_null, shape = true_classes_null), size = 4) +
   scale_colour_manual(name = "Clusters", 
                       values = cluster_col,
                       labels = c(TeX(r'($C_1$)'),
                                  TeX(r'($C_2$)'),
                                  TeX(r'($C_3)'))) +
+  scale_shape_manual(name = "True classe",
+                     values = 16) +
   xlab(TeX(r'($X_1$)')) +
   ylab(TeX(r'($X_2$)')) +
   theme_classic() +
@@ -110,7 +109,7 @@ plt2_null <- do.call(rbind.data.frame, res_null) %>%
   geom_abline(slope=1, intercept=0, col="red", size = 1.2, alpha = .7) + xlab("Theoretical Quantiles") + 
   stat_qq(aes(sample = Pvalues, colour = factor(Method, levels = c("True Intra Cluster Variance",
                                                                    "Estimated intra-cluster variance",
-                                                                   "Global Variance"))), distribution = qunif, size = 3) +
+                                                                   "Global Variance"))), distribution = qunif, size = 1.5) +
   scale_colour_manual(name = "Variance", 
                       values = results_col,
                       labels = c(TeX(r'($\Sigma_g$)'),
@@ -140,15 +139,14 @@ X <- data.frame(X1=c(rnorm(n/2, mean = 0, sd = sd1),
 cl_X <- km_fun(X, K=3)
 plt1 <- ggplot(X) + 
   aes(x=X1, y=X2) + 
-  geom_density_2d(aes(colour=true_classes), size = 1.2, alpha = .5) +
-  scale_colour_manual(name = "True classes", values = c("#274060", "#E70E02")) +
-  ggnewscale::new_scale_colour() +
-  geom_point(aes(colour = cl_X), size = 4) +
+  geom_point(aes(colour = cl_X, shape = true_classes), size = 4) +
   scale_colour_manual(name = "Clusters", 
                       values = cluster_col,
                       labels = c(TeX(r'($C_1$)'),
                                  TeX(r'($C_2$)'),
                                  TeX(r'($C_3)'))) +
+  scale_shape_manual(name = "True classes",
+                     values = c(15,16)) +
   xlab(TeX(r'($X_1$)')) +
   ylab(TeX(r'($X_2$)')) +
   theme_classic() +
@@ -170,8 +168,7 @@ res <- pblapply(1:nsimu, function(s){
   
   # Data Fission with variance using the true classes
   fiss_true <- intra_cluster_fission(X, tau = tau, 
-                                     cl_ref = true_classes,
-                                     sigma_c = cov_mat)
+                                     cl_ref = true_classes)
   cl_fiss_true <- km_fun(fiss_true$fX, K=3)
   
   clToTest_true <- order_cluster(fiss_true$gX[,1], cl_fiss_true)
@@ -211,7 +208,7 @@ plt2 <- do.call(rbind.data.frame, res) %>%
   geom_abline(slope=1, intercept=0, col="red", size = 1.2, alpha = .7) + xlab("Theoretical Quantiles") + 
   stat_qq(aes(sample = Pvalues, colour = factor(Method, levels = c("True Intra Cluster Variance",
                                                                    "Estimated intra-cluster variance",
-                                                                   "Global Variance"))), distribution = qunif, size = 3) +
+                                                                   "Global Variance"))), distribution = qunif, size = 1.5) +
   scale_colour_manual(name = "Variance", 
                       values = results_col,
                       labels = c(TeX(r'($\Sigma_g$)'),
