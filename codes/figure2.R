@@ -35,7 +35,7 @@ sim_fun_sigma <- function(n,sigma, sigma_hat, tau, nsim){
   return(res)
 }
 
-#-- Simulations 
+#-- Simulations  impact of sigma
 n <- 100
 sigma <- c(0.1, 0.5, 1, 2)
 sigma_grid <- sort(c(seq(0, 4, length.out = 50), 2, 0.1))
@@ -44,48 +44,7 @@ tau <- .4
 
 sim_res <- sim_fun_sigma(n=n, sigma = sigma, sigma_hat = sigma_grid, tau = tau, nsim = nsimu) 
 
-#-- Plot 
-data.frame(EmpTypeI = unlist(sim_res),
-           sigma = rep(sigma, each = length(sigma_grid)),
-           sigma_hat = rep(sigma_grid, length(sigma))) %>%
-  mutate(TheTypeI = compute_typeI(n = n, tau = tau, sigma = sigma, sigma_hat = sigma_hat, alpha = .05)) %>%
-  mutate(sigma_name = paste0("sigma^2==", sigma^2)) %>%
-  mutate(Ratio = (sigma^2-sigma_hat^2)/sigma^2) %>%
-  ggplot() + aes(x=Ratio, y = EmpTypeI) +
-  geom_point(shape = 2, size = 3) +  
-  geom_line(aes(x=Ratio, y = TheTypeI, colour = "Theoritical Type I error rate"), linewidth = 1.5) +
-  scale_colour_manual(name = " ",
-                      values ="#5C7AFF") +
-  xlab(TeX(r'($(\sigma^2 - \hat{\sigma^2})/\sigma^2$)')) +
-  ylab("Type I error rate") +
-  ggnewscale::new_scale_colour() +
-  geom_hline(aes(yintercept = 0.05, 
-                 colour = "5% nominal levels"),
-             linetype = 2,
-             size = 1.2) +
-  scale_colour_manual(name = "",
-                      values = "#6C0E23") +
-  facet_wrap(~as.factor(sigma_name), 
-             labeller = label_parsed,
-             scales = "free_x") +
-  theme_classic() +
-  theme(legend.position = "bottom",
-        axis.title = element_text(size = 24), 
-        axis.text = element_text(size = 18),
-        legend.text = element_text(size = 20),
-        legend.title = element_text(size = 24), 
-        strip.text = element_text(size = 24),
-        plot.tag = element_text(face = "bold", size = 24)) +
-  NULL
-
-ggsave(filename = "figures/figure2.pdf",
-       width = 200, 
-       height = 160, 
-       units = "mm",
-       dpi = 600)
-
-##- Second prorposition 
-data.frame(EmpTypeI = unlist(sim_res),
+plot_sigma <- data.frame(EmpTypeI = unlist(sim_res),
            sigma = rep(sigma, each = length(sigma_grid)),
            sigma_hat = rep(sigma_grid, length(sigma))) %>%
   mutate(TheTypeI = compute_typeI(n = n, tau = tau, sigma = sigma, sigma_hat = sigma_hat, alpha = .05)) %>%
@@ -119,9 +78,63 @@ data.frame(EmpTypeI = unlist(sim_res),
                       values = "#6C0E23") +
   NULL
 
-ggsave(filename = "figures/figure2Option2.pdf",
-       width = 180, 
-       height = 100, 
+
+
+sim_fun_n <- function(n_grid,sigma, sigma_hat, tau, nsim){
+  res <- pblapply(n_grid, function(n){sim_fun_sigma_grid(n=n, sigma = sigma, sigma_hat, tau, nsim)})
+  return(res)
+}
+
+#-- Simulations: Impact of n
+
+n <- c(50, 100, 200, 500, 1000)
+sigma <- 1
+sigma_grid <- seq(0.8, 1.8, length = 50)
+nsimu <- 1000
+tau <- .4
+
+sim_res_n <- sim_fun_n(n_grid=n, sigma = sigma, sigma_hat = sigma_grid, tau = tau, nsim = nsimu) 
+
+#-- Plot 
+plot_n <- data.frame(EmpTypeI = unlist(sim_res_n),
+           sigma = sigma,
+           SampSize = rep(n, each = length(sigma_grid)),
+           sigma_hat = rep(sigma_grid, length(n))) %>%
+  mutate(TheTypeI = compute_typeI(n = SampSize, tau = tau, sigma = sigma, sigma_hat = sigma_hat, alpha = .05)) %>%
+  mutate(sigma_name = paste0("sigma^2==", sigma^2)) %>%
+  mutate(Ratio = (sigma^2-sigma_hat^2)/sigma^2) %>%
+  ggplot() + aes(x=Ratio, y = EmpTypeI, colour = as.factor(SampSize)) +
+  geom_point(shape = 2, size = 3) +  
+  scale_colour_manual(name = "Empirical Type I error rate", 
+                      values = colorRampPalette(c("#008154", "#0092a4", "#2a2956"))(length(n)),
+                      labels = paste0("n=", n)) +
+  ggnewscale::new_scale_colour() +
+  geom_line(aes(x=Ratio, y = TheTypeI, colour = as.factor(SampSize)), linewidth = 1.5) +
+  scale_colour_manual(name = "Theoritical Type I error rate", 
+                      values = colorRampPalette(c("#008154", "#0092a4", "#2a2956"))(length(n)),
+                      labels = paste0("n=", n)) +
+  xlab(TeX(r'($(\sigma^2 - \hat{\sigma^2})/\sigma^2$)')) +
+  ylab("Type I error rate") +
+  ggnewscale::new_scale_colour() +
+  geom_hline(aes(yintercept = 0.05, 
+                 colour = "5% nominal levels"),
+             linetype = 2,
+             size = 1.2) +
+  scale_colour_manual(name = "",
+                      values = "#6C0E23") +
+  NULL
+
+plot_sigma + plot_n + plot_annotation(tag_levels = "A") &
+  theme(axis.title = element_text(size = 16), 
+        axis.text = element_text(size = 16),
+        # legend.position = "bottom",
+        legend.text = element_text(size = 16),
+        legend.title = element_text(size = 16),
+        strip.text = element_text(size = 16),
+        plot.tag = element_text(face = "bold", size = 16))
+ggsave(filename = "figures/figure2.pdf",
+       width = 400,
+       height = 120,
        units = "mm",
        dpi = 600)
- 
+          
