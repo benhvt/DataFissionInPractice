@@ -113,11 +113,10 @@ X <- cbind.data.frame(X1=c(x1,x2),
            TrueClasses=as.factor(true_class))
 cl_X <- km_fun(cbind(c(x1,x2), y), K = 3)
 
-plt1 <- ggplot(X) + aes(x=X1, y=X2) + 
-  geom_density_2d(aes(colour=TrueClasses), size = 1.2, alpha = .5) +
-  scale_colour_manual(name = "True classes", values = c("#274060", "#E70E02")) +
-  ggnewscale::new_scale_colour() +
-  geom_point(aes(colour = cl_X), size = 4) +
+plt1 <- ggplot(X) + aes(x=X1, y=X2, colour = cl_X, shape = as.factor(true_class)) + 
+  geom_point(size = 3) +
+  scale_shape_manual(name = "True classe",
+                    values = c(15,16)) +
   scale_colour_manual(name = "Clusters", 
                       values = cluster_col,
                       labels = c(TeX(r'($C_1$)'),
@@ -135,11 +134,11 @@ plt2 <- do.call(rbind.data.frame, sim_res_wrong) %>%
   geom_abline(slope=1, intercept=0, col="red", size = 1.2, alpha = .7) + xlab("Theoretical Quantiles") + 
   stat_qq(aes(sample = pval, colour = factor(Overdispersion,
                                              levels = c('Intra-comp', 'Intra-cluster', 'Global'))),
-              distribution = qunif, size = 3) +
+              distribution = qunif, size = 1.5) +
   scale_colour_manual(name = "Overdispersion", 
                       values = results_col,
-                      labels=c(TeX(r'($\hat{\theta}_{g}$)'),
-                               TeX(r'($\hat{\theta}_{\hat{g}}$)'),
+                      labels=c(TeX(r'($\hat{\theta}_{k}$)'),
+                               TeX(r'($\hat{\theta}_{\hat{k}}$)'),
                                TeX(r'($\hat{\theta}$)'))) +
   ylab("Empirical Quantiles") + 
   xlim(c(0, 1)) + ylim(c(0, 1)) + theme_classic() 
@@ -149,16 +148,20 @@ plt2
 # ------------------------------ Applications --------------------------- #
 
 overdispersion_estimate <- read.csv(file ="results/overdispersion_estimate.csv")
-R2 <- overdispersion_estimate %>% filter(Global < 4 & Intra < 4) %>%
+
+R2 <- overdispersion_estimate  %>%
+  filter(Global < 4, Intra < 4) %>%
   group_by(CellType) %>%
   summarise(R2 = cor(Intra, Global))
 
 plt_application <- ggplot(overdispersion_estimate) + 
-  aes(x=Global, y = Intra, colour = CellType) +
-  geom_point(size = 4, alpha = .5) + 
+  aes(x=Intra, y = Global, colour = CellType) +
+  geom_point(size = 2, alpha = .5) + 
   xlim(c(0, 4)) +
+  # scale_x_log10() +
   ylim(c(0, 4)) +
-  xlab(TeX(r'(Intra-cell population overdispersion $\hat{\theta}_g$)')) +
+  # scale_y_log10() +
+  xlab(TeX(r'(Intra-cell population overdispersion $\hat{\theta}_k$)')) +
   ylab(TeX(r'(Global overdispersion $\hat{\theta}$)')) +
   scale_colour_manual(name = "Cell type", 
                       values = c('#5C0029', 
@@ -174,17 +177,15 @@ plt_application <- ggplot(overdispersion_estimate) +
 
 plt_final <- (plt1 + plt2) / plt_application +
   plot_annotation(tag_levels = "A") &
-  theme(axis.title = element_text(size = 20), 
-        axis.text = element_text(size = 14),
-        # legend.position = "bottom",
-        legend.text = element_text(size = 16),
-        legend.title = element_text(size = 18),
-        strip.text = element_text(size = 16),
-        plot.tag = element_text(face = "bold", size = 20))
+  theme(axis.title = element_text(size = 24), 
+        axis.text = element_text(size = 18),
+        legend.text = element_text(size = 20),
+        legend.title = element_text(size = 24),
+        plot.tag = element_text(face = "bold", size = 24))
 plt_final
 
 ggsave(plt_final, filename = "figures/figure4.pdf",
-       width = 300, 
-       height = 200, 
+       width = 350, 
+       height = 240, 
        units = "mm",
         dpi = 600)
