@@ -67,3 +67,29 @@ compute_typeI <- function(n, tau, sigma, sigma_hat, alpha){
   
   return(pnorm(qu_n, mean = mean_t, sd= 1, lower.tail = FALSE) + pnorm(-qu_n, mean = mean_t, sd= 1, lower.tail = TRUE))
 }
+
+
+# Non parametric variance estimation 
+kernel <- function(u, h) {
+  a <- h *sqrt(3)
+  return(ifelse(abs(u) < a, 0.5/a, 0))
+}
+
+weightvar <- function(x,obs, h = NULL){
+  if (is.null(h)) {
+    h <- sd(x) * (4/(3*n))^(1/5)
+  }
+  weigth <- kernel(x-obs, h)
+  return(modi::weighted.var(obs, weigth))
+}
+
+local_var <- function(x){
+  n <- length(x)
+  h0 <- ks::hpi(x, deriv.order = 1)
+  pilot <- ks::kde(x, h = h0, eval.points=x)$estimate
+  lambda <- exp(mean(log(pilot)))
+  hi <- h0*sqrt(lambda/pilot)
+  variance_wk <- sapply(1:n, FUN = function(i){weightvar(x[i], obs = x, h = hi[i])})
+  return(variance_wk)
+}
+
